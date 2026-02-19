@@ -18,7 +18,8 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["./src/config/index.ts"],
-    reporters: ["default", "allure-vitest"],
+    reporters: ["default", "json"],
+    outputFile: { json: "test-results/results.json" },
     testTimeout: 30_000,
   },
 });
