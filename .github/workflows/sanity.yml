@@ -35,7 +35,11 @@ jobs:
         run: npm ci
 
       - name: Run sanity tests
-        run: npx vitest run --dir tests/sanity --reporter=default --reporter=json --outputFile=test-results/results.json
+        run: |
+          npx vitest run --dir tests/sanity \
+            --reporter=default \
+            --reporter=json --outputFile=test-results/results.json \
+            --reporter=allure-vitest
         env:
           ENV: ${{ github.event.inputs.environment || 'stage' }}
           CI: true
@@ -46,4 +50,12 @@ jobs:
         with:
           name: sanity-test-results
           path: test-results/
+          retention-days: 14
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanity-allure-results
+          path: allure-results/
           retention-days: 14

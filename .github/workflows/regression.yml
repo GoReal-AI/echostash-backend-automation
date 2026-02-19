@@ -35,7 +35,11 @@ jobs:
         run: npm ci
 
       - name: Run regression tests
-        run: npx vitest run --reporter=default --reporter=json --outputFile=test-results/results.json
+        run: |
+          npx vitest run \
+            --reporter=default \
+            --reporter=json --outputFile=test-results/results.json \
+            --reporter=allure-vitest
         env:
           ENV: ${{ github.event.inputs.environment || 'stage' }}
           CI: true
@@ -46,4 +50,12 @@ jobs:
         with:
           name: regression-test-results
           path: test-results/
+          retention-days: 30
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-allure-results
+          path: allure-results/
           retention-days: 30

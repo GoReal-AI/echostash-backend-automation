@@ -18,7 +18,7 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["./src/config/index.ts"],
-    reporters: ["default"],
+    reporters: ["default", "allure-vitest"],
     testTimeout: 30_000,
   },
 });
