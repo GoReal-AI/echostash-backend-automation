@@ -19,7 +19,9 @@
       "@clients/*": ["src/clients/*"],
       "@helpers/*": ["src/helpers/*"],
       "@fixtures/*": ["src/fixtures/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@types/*": ["src/types/*"],
+      "@sdk-dogfood/*": ["src/sdk-dogfood/*"]
     }
   },
   "include": ["src/**/*", "tests/**/*"],

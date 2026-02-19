@@ -8,9 +8,20 @@
     "test": "vitest run",
     "test:sanity": "vitest run --dir tests/sanity",
     "test:regression": "vitest run --dir tests/regression",
+    "test:auth": "vitest run -t 'auth|Auth|guest|Guest'",
+    "test:prompts": "vitest run -t 'prompt|Prompt'",
+    "test:sdk": "vitest run -t 'sdk|SDK'",
+    "test:eval": "vitest run -t 'eval|Eval'",
+    "test:keys": "vitest run -t 'key|Key|api.key'",
+    "test:billing": "vitest run -t 'billing|Billing'",
+    "test:plp": "vitest run -t 'plp|PLP'",
+    "test:admin": "vitest run -t 'admin|Admin'",
+    "test:public": "vitest run -t 'public|Public'",
     "test:watch": "vitest",
     "test:report": "vitest run --reporter=allure-vitest",
-    "lint": "eslint src/ tests/"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/ tests/",
+    "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
