@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "test:sanity": "vitest run --include 'tests/sanity/**/*.test.ts'",
-    "test:regression": "vitest run --include 'tests/regression/**/*.test.ts'",
+    "test:sanity": "vitest run tests/sanity",
+    "test:regression": "vitest run tests/regression",
     "test:auth": "vitest run -t 'auth|Auth|guest|Guest'",
     "test:prompts": "vitest run -t 'prompt|Prompt'",
     "test:sdk": "vitest run -t 'sdk|SDK'",
