@@ -6,7 +6,7 @@ import { PromptsClient } from "@clients/prompts-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData, compositeData } from "@fixtures/test-data";
 import { CompositeBuilder } from "@fixtures/builders";
-import type { Project, Prompt } from "../../src/types/index.js";
+import type { Project, Prompt } from "@api-types/index";
 
 describe("Composites - CRUD", () => {
   let api: ApiClient;

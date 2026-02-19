@@ -13,7 +13,7 @@ import {
   evalGateData,
 } from "@fixtures/test-data";
 import { EvalDatasetBuilder, EvalSuiteBuilder } from "@fixtures/builders";
-import type { Project, Prompt, EvalDataset, EvalSuite } from "../../src/types/index.js";
+import type { Project, Prompt, EvalDataset, EvalSuite } from "@api-types/index";
 
 describe("Eval Framework", () => {
   let api: ApiClient;

@@ -6,7 +6,7 @@ import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData, versionData } from "@fixtures/test-data";
 import { PromptBuilder } from "@fixtures/builders";
 import { expectValidPrompt, expectPaginated } from "@helpers/assertions";
-import type { Project, Prompt } from "../../src/types/index.js";
+import type { Project, Prompt } from "@api-types/index";
 
 describe("Prompts - CRUD & Versioning", () => {
   let api: ApiClient;

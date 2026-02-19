@@ -5,7 +5,7 @@ import { getGuestClient } from "@helpers/auth";
 import { projectData } from "@fixtures/test-data";
 import { ProjectBuilder } from "@fixtures/builders";
 import { expectValidProject, expectPaginated } from "@helpers/assertions";
-import type { Project } from "../../src/types/index.js";
+import type { Project } from "@api-types/index";
 
 describe("Projects - CRUD", () => {
   let api: ApiClient;

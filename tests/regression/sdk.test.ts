@@ -7,7 +7,7 @@ import { ProjectsClient } from "@clients/projects-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData, versionData } from "@fixtures/test-data";
 import { uniqueId } from "@utils/index";
-import type { Project, Prompt } from "../../src/types/index.js";
+import type { Project, Prompt } from "@api-types/index";
 
 describe("SDK Endpoints", () => {
   let jwtApi: ApiClient;

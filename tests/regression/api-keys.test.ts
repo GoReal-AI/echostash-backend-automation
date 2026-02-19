@@ -7,7 +7,7 @@ import { PromptsClient } from "@clients/prompts-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData } from "@fixtures/test-data";
 import { uniqueId } from "@utils/index";
-import type { Project } from "../../src/types/index.js";
+import type { Project } from "@api-types/index";
 
 describe("API Keys - CRUD & SDK Access", () => {
   let api: ApiClient;
