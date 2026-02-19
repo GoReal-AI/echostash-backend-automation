@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test output
+allure-results/
+allure-report/
+test-results/
+html-report/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

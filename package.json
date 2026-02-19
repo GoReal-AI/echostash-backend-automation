@@ -1,0 +1,26 @@
+{
+  "name": "echostash-backend-automation",
+  "version": "0.1.0",
+  "description": "Echostash backend API automation tests with Vitest and TypeScript",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:sanity": "vitest run --dir tests/sanity",
+    "test:regression": "vitest run --dir tests/regression",
+    "test:watch": "vitest",
+    "test:report": "vitest run --reporter=allure-vitest",
+    "lint": "eslint src/ tests/"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "allure-vitest": "^3.0.7",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.16.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "dependencies": {
+    "axios": "^1.7.9"
+  }
+}

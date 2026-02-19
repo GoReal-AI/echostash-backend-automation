@@ -1,0 +1,49 @@
+name: Backend Sanity Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "stage"
+        type: choice
+        options:
+          - local
+          - stage
+          - prod
+  pull_request:
+    branches: [main]
+
+jobs:
+  sanity:
+    name: Run Sanity Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run sanity tests
+        run: npx vitest run --dir tests/sanity --reporter=default --reporter=json --outputFile=test-results/results.json
+        env:
+          ENV: ${{ github.event.inputs.environment || 'stage' }}
+          CI: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sanity-test-results
+          path: test-results/
+          retention-days: 14
