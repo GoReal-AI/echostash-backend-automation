@@ -35,10 +35,7 @@ jobs:
         run: npm ci
 
       - name: Run regression tests
-        run: |
-          npx vitest run \
-            --reporter=default \
-            --reporter=json --outputFile=test-results/results.json
+        run: npx vitest run --reporter=default --reporter=json --outputFile=test-results/results.json
         env:
           ENV: ${{ github.event.inputs.environment || 'stage' }}
           CI: true

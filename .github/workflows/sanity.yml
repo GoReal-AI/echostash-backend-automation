@@ -35,10 +35,7 @@ jobs:
         run: npm ci
 
       - name: Run sanity tests
-        run: |
-          npx vitest run --dir tests/sanity \
-            --reporter=default \
-            --reporter=json --outputFile=test-results/results.json
+        run: npx vitest run --include 'tests/sanity/**/*.test.ts' --reporter=default --reporter=json --outputFile=test-results/results.json
         env:
           ENV: ${{ github.event.inputs.environment || 'stage' }}
           CI: true
