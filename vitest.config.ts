@@ -9,7 +9,7 @@ export default defineConfig({
       "@helpers": path.resolve(__dirname, "src/helpers"),
       "@fixtures": path.resolve(__dirname, "src/fixtures"),
       "@utils": path.resolve(__dirname, "src/utils"),
-      "@types": path.resolve(__dirname, "src/types"),
+      "@api-types": path.resolve(__dirname, "src/types"),
       "@sdk-dogfood": path.resolve(__dirname, "src/sdk-dogfood"),
     },
   },

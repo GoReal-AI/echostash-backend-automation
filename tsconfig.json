@@ -20,7 +20,7 @@
       "@helpers/*": ["src/helpers/*"],
       "@fixtures/*": ["src/fixtures/*"],
       "@utils/*": ["src/utils/*"],
-      "@types/*": ["src/types/*"],
+      "@api-types/*": ["src/types/*"],
       "@sdk-dogfood/*": ["src/sdk-dogfood/*"]
     }
   },
