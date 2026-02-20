@@ -12,3 +12,4 @@ export { PublicClient } from "./public-client.js";
 export { AdminClient } from "./admin-client.js";
 export { PlpClient } from "./plp-client.js";
 export { CompositesClient } from "./composites-client.js";
+export { AutomationClient } from "./automation-client.js";

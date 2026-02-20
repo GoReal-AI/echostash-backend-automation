@@ -4,6 +4,8 @@ export {
   getApiKeyClient,
   refreshToken,
   loginAndGetClient,
+  automationLogin,
+  getAutomationClient,
 } from "./auth.js";
 
 export {

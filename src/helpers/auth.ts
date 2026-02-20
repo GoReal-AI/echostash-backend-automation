@@ -1,5 +1,6 @@
 import { ApiClient } from "../clients/api-client.js";
 import { AuthClient } from "../clients/auth-client.js";
+import { AutomationClient } from "../clients/automation-client.js";
 import { getTestConfig } from "../config/index.js";
 import type { AuthTokens } from "../types/index.js";
 
@@ -56,4 +57,22 @@ export async function loginAndGetClient(email?: string, password?: string): Prom
     password: password || config.testUserPassword,
   });
   return new ApiClient({ token: response.data.accessToken });
+}
+
+/**
+ * Log in via the automation endpoint (no Google OAuth needed).
+ * Only available on stage/dev environments.
+ */
+export async function automationLogin(email: string, name?: string): Promise<{ client: ApiClient; tokens: AuthTokens; isFirstLogin: boolean }> {
+  const api = new ApiClient();
+  const automationClient = new AutomationClient(api);
+  return automationClient.loginAndGetClient(email, name);
+}
+
+/**
+ * Get an AutomationClient for cheats (set-plan, reset-quotas, etc.).
+ */
+export function getAutomationClient(): AutomationClient {
+  const api = new ApiClient();
+  return new AutomationClient(api);
 }
