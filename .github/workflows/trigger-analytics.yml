@@ -1,0 +1,54 @@
+name: Trigger Analytics
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt_id:
+        description: "Prompt ID to fetch/render"
+        required: true
+        type: string
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - stage
+        default: stage
+      variables:
+        description: "JSON string of variables for render (optional)"
+        required: false
+        type: string
+
+jobs:
+  trigger-analytics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout SDK
+        uses: actions/checkout@v4
+        with:
+          repository: GoReal-AI/echostash-sdks
+          path: ../Echostash/echostash-sdk
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build SDK
+        working-directory: ../Echostash/echostash-sdk/packages/js
+        run: npm ci && npm run build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run trigger-analytics
+        env:
+          API_KEY: ${{ secrets.ECHOSTASH_API_KEY }}
+          PROMPT_ID: ${{ inputs.prompt_id }}
+          BASE_URL: https://gra-echostash-be-stage.up.railway.app
+          VARIABLES: ${{ inputs.variables }}
+        run: npm run trigger-analytics
