@@ -4,7 +4,7 @@ import { ProjectsClient } from "@clients/projects-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData } from "@fixtures/test-data";
 import { ProjectBuilder } from "@fixtures/builders";
-import { expectValidProject, expectPaginated, expectError } from "@helpers/assertions";
+import { expectValidProject, expectError } from "@helpers/assertions";
 import { uniqueId } from "@utils/index";
 import type { Project } from "@api-types/index";
 
@@ -86,16 +86,16 @@ describe("Projects - Full CRUD + Validation + Ownership", () => {
   describe("List (PROJ-006, PROJ-007)", () => {
     it("PROJ-006: lists user projects", async () => {
       const list = await projects.list();
-      expectPaginated(list);
-      expect(list.content.length).toBeGreaterThan(0);
+      expect(Array.isArray(list)).toBe(true);
+      expect(list.length).toBeGreaterThan(0);
     });
 
     it("PROJ-007: new user gets empty project list", async () => {
       const freshApi = await getGuestClient();
       const freshProjects = new ProjectsClient(freshApi);
       const list = await freshProjects.list();
-      expectPaginated(list);
-      expect(list.content.length).toBe(0);
+      expect(Array.isArray(list)).toBe(true);
+      expect(list.length).toBe(0);
     });
   });
 

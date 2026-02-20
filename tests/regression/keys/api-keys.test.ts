@@ -16,7 +16,7 @@ describe("API Keys - CRUD & Auth", () => {
   let promptsClient: PromptsClient;
   let testProject: Project;
   let publishedPrompt: Prompt;
-  const createdKeyIds: string[] = [];
+  const createdKeyIds: number[] = [];
 
   beforeAll(async () => {
     api = await getGuestClient();
@@ -26,14 +26,12 @@ describe("API Keys - CRUD & Auth", () => {
 
     // Setup: create a published prompt for SDK auth tests
     testProject = await projectsClient.create(projectData());
-    publishedPrompt = await promptsClient.create(
-      promptData(testProject.id, { content: "API key test {{var}}" })
-    );
+    publishedPrompt = await promptsClient.create(promptData(testProject.id));
     const version = await promptsClient.createVersion(
       publishedPrompt.id,
       versionData({ content: "API key test {{var}}" })
     );
-    await promptsClient.publish(publishedPrompt.id, { versionNumber: version.versionNumber });
+    await promptsClient.publish(publishedPrompt.id, { versionNo: version.versionNo });
   });
 
   afterAll(async () => {

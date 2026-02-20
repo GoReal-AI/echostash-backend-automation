@@ -26,14 +26,12 @@ describe("Public Endpoints", () => {
     testProject = await projectsClient.create(projectData());
 
     // Create a prompt and make it public
-    publicPrompt = await promptsClient.create(
-      promptData(testProject.id, { content: "Public prompt content {{var}}" })
-    );
+    publicPrompt = await promptsClient.create(promptData(testProject.id));
     const version = await promptsClient.createVersion(
       publicPrompt.id,
       versionData({ content: "Public prompt content {{var}}" })
     );
-    await promptsClient.publish(publicPrompt.id, { versionNumber: version.versionNumber });
+    await promptsClient.publish(publicPrompt.id, { versionNo: version.versionNo });
     await promptsClient.updateVisibility(publicPrompt.id, { visibility: "public" });
   });
 
@@ -66,7 +64,7 @@ describe("Public Endpoints", () => {
     it("PUB-007: shares a prompt anonymously", async () => {
       try {
         const result = await publicClient.share({
-          promptId: publicPrompt.id,
+          promptId: String(publicPrompt.id),
           slug: `test-share-${uniqueId()}`,
         });
         expect(result).toBeDefined();
@@ -111,7 +109,7 @@ describe("Public Endpoints", () => {
     it("PUB-008: tracks a view on a public prompt", async () => {
       try {
         // Need the slug - try using the prompt ID as slug
-        await publicClient.trackView(publicPrompt.id);
+        await publicClient.trackView(String(publicPrompt.id));
       } catch (err: unknown) {
         // May need a proper slug
         const error = err as { response?: { status: number } };

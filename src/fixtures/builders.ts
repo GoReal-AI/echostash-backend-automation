@@ -3,7 +3,7 @@ import type {
   CreatePromptRequest,
   CreateProjectRequest,
   CreateCompositeRequest,
-  CompositeStep,
+  CompositeItem,
   CreateEvalDatasetRequest,
   EvalDatasetItem,
   CreateEvalSuiteRequest,
@@ -11,21 +11,13 @@ import type {
 
 /**
  * Builder pattern for constructing CreatePromptRequest objects.
- *
- * Usage:
- *   const req = new PromptBuilder("project-123")
- *     .withName("My Prompt")
- *     .withContent("Hello {{user}}")
- *     .withVisibility("public")
- *     .build();
  */
 export class PromptBuilder {
   private data: CreatePromptRequest;
 
-  constructor(projectId: string) {
+  constructor(projectId: number | string) {
     this.data = {
       name: `Prompt ${uniqueId()}`,
-      content: "Default content {{variable}}",
       projectId,
     };
   }
@@ -35,8 +27,8 @@ export class PromptBuilder {
     return this;
   }
 
-  withContent(content: string): this {
-    this.data.content = content;
+  withContent(_content: string): this {
+    // Content is set on versions, not on create. Keep for builder API compat.
     return this;
   }
 
@@ -87,12 +79,11 @@ export class ProjectBuilder {
  */
 export class CompositeBuilder {
   private data: CreateCompositeRequest;
+  private _items: CompositeItem[] = [];
 
-  constructor(projectId: string) {
+  constructor(_projectId?: number | string) {
     this.data = {
       name: `Composite ${uniqueId()}`,
-      projectId,
-      steps: [],
     };
   }
 
@@ -106,18 +97,17 @@ export class CompositeBuilder {
     return this;
   }
 
-  addStep(step: CompositeStep): this {
-    this.data.steps.push(step);
-    return this;
-  }
-
-  withSteps(steps: CompositeStep[]): this {
-    this.data.steps = steps;
+  addStep(step: { promptId: number | string; order: number }): this {
+    this._items.push({
+      itemType: "PROMPT",
+      position: step.order,
+      promptId: Number(step.promptId),
+    });
     return this;
   }
 
   build(): CreateCompositeRequest {
-    return { ...this.data };
+    return { ...this.data, items: this._items };
   }
 }
 
@@ -145,7 +135,7 @@ export class EvalDatasetBuilder {
   }
 
   addItem(item: EvalDatasetItem): this {
-    this.data.items.push(item);
+    this.data.items!.push(item);
     return this;
   }
 

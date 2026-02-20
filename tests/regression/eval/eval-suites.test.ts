@@ -23,9 +23,7 @@ describe("Eval - Suites & Tests", () => {
     promptsClient = new PromptsClient(api);
     projectsClient = new ProjectsClient(api);
     testProject = await projectsClient.create(projectData());
-    testPrompt = await promptsClient.create(
-      promptData(testProject.id, { content: "Eval suite test {{name}}" })
-    );
+    testPrompt = await promptsClient.create(promptData(testProject.id));
     testDataset = await evalClient.createDataset(testPrompt.id, evalDatasetData());
   });
 

@@ -6,7 +6,7 @@ import type {
   CreateEvalDatasetRequest,
   CreateEvalSuiteRequest,
   CreateEvalTestRequest,
-  CreateEvalGateRequest,
+  UpdateEvalGateRequest,
   CreateCompositeRequest,
   CreateApiKeyRequest,
   CreateShortLinkRequest,
@@ -28,12 +28,11 @@ export function projectData(overrides?: Partial<CreateProjectRequest>): CreatePr
 // --- Prompt fixtures ---
 
 export function promptData(
-  projectId: string,
+  projectId: number | string,
   overrides?: Partial<CreatePromptRequest>
 ): CreatePromptRequest {
   return {
     name: `Test Prompt ${uniqueId()}`,
-    content: "Hello {{name}}, welcome to {{place}}!",
     description: "An auto-generated test prompt",
     projectId,
     ...overrides,
@@ -91,11 +90,11 @@ export function evalTestData(overrides?: Partial<CreateEvalTestRequest>): Create
 }
 
 export function evalGateData(
-  suiteId: string,
-  overrides?: Partial<CreateEvalGateRequest>
-): CreateEvalGateRequest {
+  suiteId: number | string,
+  overrides?: Partial<UpdateEvalGateRequest>
+): UpdateEvalGateRequest {
   return {
-    suiteId,
+    suiteId: Number(suiteId),
     threshold: 0.8,
     enabled: true,
     ...overrides,
@@ -105,17 +104,17 @@ export function evalGateData(
 // --- Composite fixtures ---
 
 export function compositeData(
-  projectId: string,
-  promptIds: string[],
+  projectId: number | string,
+  promptIds: (number | string)[],
   overrides?: Partial<CreateCompositeRequest>
 ): CreateCompositeRequest {
   return {
     name: `Test Composite ${uniqueId()}`,
     description: "Auto-generated composite prompt",
-    projectId,
-    steps: promptIds.map((promptId, index) => ({
-      promptId,
-      order: index + 1,
+    items: promptIds.map((promptId, index) => ({
+      itemType: "PROMPT",
+      position: index + 1,
+      promptId: Number(promptId),
     })),
     ...overrides,
   };

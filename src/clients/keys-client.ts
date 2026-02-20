@@ -15,7 +15,7 @@ export class KeysClient {
     return res.data;
   }
 
-  async revoke(id: string): Promise<void> {
+  async revoke(id: number | string): Promise<void> {
     await this.api.delete(`/api/keys/${id}`);
   }
 }

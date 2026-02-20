@@ -5,7 +5,7 @@ import { ProjectsClient } from "@clients/projects-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData, versionData } from "@fixtures/test-data";
 import { uniqueId } from "@utils/index";
-import type { Project, Prompt, PromptVersion } from "@api-types/index";
+import type { Project, Prompt, CreateVersionResponse } from "@api-types/index";
 
 describe("Prompts - Publish", () => {
   let api: ApiClient;
@@ -30,7 +30,7 @@ describe("Prompts - Publish", () => {
 
   describe("Publish Version (PRMT-022, PRMT-023)", () => {
     let testPrompt: Prompt;
-    let testVersion: PromptVersion;
+    let testVersion: CreateVersionResponse;
 
     beforeAll(async () => {
       testPrompt = await prompts.create(promptData(testProject.id));
@@ -39,16 +39,16 @@ describe("Prompts - Publish", () => {
 
     it("PRMT-022: publishes a version", async () => {
       const result = await prompts.publish(testPrompt.id, {
-        versionNumber: testVersion.versionNumber,
+        versionNo: testVersion.versionNo,
       });
 
       expect(result).toBeDefined();
-      expect(result.id).toBe(testPrompt.id);
+      expect(result.promptId).toBe(testPrompt.id);
     });
 
     it("PRMT-023: returns 404 for non-existent versionNo", async () => {
       try {
-        await prompts.publish(testPrompt.id, { versionNumber: 99999 });
+        await prompts.publish(testPrompt.id, { versionNo: 99999 });
         expect.fail("Expected 404");
       } catch (err: unknown) {
         const error = err as { response?: { status: number } };
@@ -67,7 +67,7 @@ describe("Prompts - Publish", () => {
       });
 
       expect(result).toBeDefined();
-      expect(result.id).toBe(testPrompt.id);
+      expect(result.promptId).toBe(testPrompt.id);
     });
   });
 });

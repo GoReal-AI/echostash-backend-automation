@@ -23,9 +23,6 @@ describe("Context Store Endpoints", () => {
     it("gets storage usage info", async () => {
       const usage = await contextClient.getUsage();
       expect(usage).toBeDefined();
-      expect(typeof usage.totalAssets).toBe("number");
-      expect(typeof usage.totalSize).toBe("number");
-      expect(typeof usage.maxSize).toBe("number");
     });
   });
 

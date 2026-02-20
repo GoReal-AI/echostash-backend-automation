@@ -11,8 +11,9 @@ import type {
   UpdateEvalTestRequest,
   EvalRun,
   EvalGate,
-  CreateEvalGateRequest,
   UpdateEvalGateRequest,
+  RunSuiteRequest,
+  PaginatedResponse,
 } from "../types/index.js";
 
 export class EvalClient {
@@ -20,59 +21,59 @@ export class EvalClient {
 
   // --- Datasets ---
 
-  async createDataset(promptId: string, data: CreateEvalDatasetRequest): Promise<EvalDataset> {
+  async createDataset(promptId: number | string, data: CreateEvalDatasetRequest): Promise<EvalDataset> {
     const res = await this.api.post<EvalDataset>(`/api/prompts/${promptId}/eval/datasets`, data);
     return res.data;
   }
 
-  async listDatasets(promptId: string): Promise<EvalDataset[]> {
+  async listDatasets(promptId: number | string): Promise<EvalDataset[]> {
     const res = await this.api.get<EvalDataset[]>(`/api/prompts/${promptId}/eval/datasets`);
     return res.data;
   }
 
-  async getDataset(promptId: string, datasetId: string): Promise<EvalDataset> {
+  async getDataset(promptId: number | string, datasetId: string): Promise<EvalDataset> {
     const res = await this.api.get<EvalDataset>(`/api/prompts/${promptId}/eval/datasets/${datasetId}`);
     return res.data;
   }
 
-  async updateDataset(promptId: string, datasetId: string, data: UpdateEvalDatasetRequest): Promise<EvalDataset> {
+  async updateDataset(promptId: number | string, datasetId: string, data: UpdateEvalDatasetRequest): Promise<EvalDataset> {
     const res = await this.api.put<EvalDataset>(`/api/prompts/${promptId}/eval/datasets/${datasetId}`, data);
     return res.data;
   }
 
-  async deleteDataset(promptId: string, datasetId: string): Promise<void> {
+  async deleteDataset(promptId: number | string, datasetId: string): Promise<void> {
     await this.api.delete(`/api/prompts/${promptId}/eval/datasets/${datasetId}`);
   }
 
   // --- Suites ---
 
-  async createSuite(promptId: string, data: CreateEvalSuiteRequest): Promise<EvalSuite> {
+  async createSuite(promptId: number | string, data: CreateEvalSuiteRequest): Promise<EvalSuite> {
     const res = await this.api.post<EvalSuite>(`/api/prompts/${promptId}/eval/suites`, data);
     return res.data;
   }
 
-  async listSuites(promptId: string): Promise<EvalSuite[]> {
+  async listSuites(promptId: number | string): Promise<EvalSuite[]> {
     const res = await this.api.get<EvalSuite[]>(`/api/prompts/${promptId}/eval/suites`);
     return res.data;
   }
 
-  async getSuite(promptId: string, suiteId: string): Promise<EvalSuite> {
+  async getSuite(promptId: number | string, suiteId: number | string): Promise<EvalSuite> {
     const res = await this.api.get<EvalSuite>(`/api/prompts/${promptId}/eval/suites/${suiteId}`);
     return res.data;
   }
 
-  async updateSuite(promptId: string, suiteId: string, data: UpdateEvalSuiteRequest): Promise<EvalSuite> {
+  async updateSuite(promptId: number | string, suiteId: number | string, data: UpdateEvalSuiteRequest): Promise<EvalSuite> {
     const res = await this.api.put<EvalSuite>(`/api/prompts/${promptId}/eval/suites/${suiteId}`, data);
     return res.data;
   }
 
-  async deleteSuite(promptId: string, suiteId: string): Promise<void> {
+  async deleteSuite(promptId: number | string, suiteId: number | string): Promise<void> {
     await this.api.delete(`/api/prompts/${promptId}/eval/suites/${suiteId}`);
   }
 
   // --- Tests ---
 
-  async createTest(promptId: string, suiteId: string, data: CreateEvalTestRequest): Promise<EvalTest> {
+  async createTest(promptId: number | string, suiteId: number | string, data: CreateEvalTestRequest): Promise<EvalTest> {
     const res = await this.api.post<EvalTest>(
       `/api/prompts/${promptId}/eval/suites/${suiteId}/tests`,
       data
@@ -80,14 +81,14 @@ export class EvalClient {
     return res.data;
   }
 
-  async listTests(promptId: string, suiteId: string): Promise<EvalTest[]> {
+  async listTests(promptId: number | string, suiteId: number | string): Promise<EvalTest[]> {
     const res = await this.api.get<EvalTest[]>(
       `/api/prompts/${promptId}/eval/suites/${suiteId}/tests`
     );
     return res.data;
   }
 
-  async getTest(promptId: string, suiteId: string, testId: string): Promise<EvalTest> {
+  async getTest(promptId: number | string, suiteId: number | string, testId: number | string): Promise<EvalTest> {
     const res = await this.api.get<EvalTest>(
       `/api/prompts/${promptId}/eval/suites/${suiteId}/tests/${testId}`
     );
@@ -95,9 +96,9 @@ export class EvalClient {
   }
 
   async updateTest(
-    promptId: string,
-    suiteId: string,
-    testId: string,
+    promptId: number | string,
+    suiteId: number | string,
+    testId: number | string,
     data: UpdateEvalTestRequest
   ): Promise<EvalTest> {
     const res = await this.api.put<EvalTest>(
@@ -107,56 +108,59 @@ export class EvalClient {
     return res.data;
   }
 
-  async deleteTest(promptId: string, suiteId: string, testId: string): Promise<void> {
+  async deleteTest(promptId: number | string, suiteId: number | string, testId: number | string): Promise<void> {
     await this.api.delete(`/api/prompts/${promptId}/eval/suites/${suiteId}/tests/${testId}`);
   }
 
   // --- Runs ---
 
-  async startRun(promptId: string, suiteId: string): Promise<EvalRun> {
+  async startRun(promptId: number | string, suiteId: number | string, modelData?: Record<string, unknown>): Promise<EvalRun> {
+    const body: RunSuiteRequest = { suiteId: Number(suiteId), modelData };
     const res = await this.api.post<EvalRun>(
-      `/api/prompts/${promptId}/eval/suites/${suiteId}/runs`
+      `/api/prompts/${promptId}/eval/run`,
+      body
     );
     return res.data;
   }
 
-  async listRuns(promptId: string, suiteId: string): Promise<EvalRun[]> {
-    const res = await this.api.get<EvalRun[]>(
-      `/api/prompts/${promptId}/eval/suites/${suiteId}/runs`
+  async listRuns(promptId: number | string, suiteId?: number | string): Promise<PaginatedResponse<EvalRun>> {
+    const res = await this.api.get<PaginatedResponse<EvalRun>>(
+      `/api/prompts/${promptId}/eval/runs`
     );
     return res.data;
   }
 
-  async getRun(promptId: string, suiteId: string, runId: string): Promise<EvalRun> {
+  async getRun(promptId: number | string, suiteId: number | string, runId: number | string): Promise<EvalRun> {
     const res = await this.api.get<EvalRun>(
-      `/api/prompts/${promptId}/eval/suites/${suiteId}/runs/${runId}`
+      `/api/prompts/${promptId}/eval/runs/${runId}`
     );
     return res.data;
   }
 
-  // --- Gates ---
+  // --- Gate (singular) ---
 
-  async createGate(promptId: string, data: CreateEvalGateRequest): Promise<EvalGate> {
-    const res = await this.api.post<EvalGate>(`/api/prompts/${promptId}/eval/gates`, data);
+  async getGate(promptId: number | string): Promise<EvalGate> {
+    const res = await this.api.get<EvalGate>(`/api/prompts/${promptId}/eval/gate`);
     return res.data;
   }
 
-  async listGates(promptId: string): Promise<EvalGate[]> {
-    const res = await this.api.get<EvalGate[]>(`/api/prompts/${promptId}/eval/gates`);
+  async updateGate(promptId: number | string, data: UpdateEvalGateRequest): Promise<EvalGate> {
+    const res = await this.api.put<EvalGate>(`/api/prompts/${promptId}/eval/gate`, data);
     return res.data;
   }
 
-  async getGate(promptId: string, gateId: string): Promise<EvalGate> {
-    const res = await this.api.get<EvalGate>(`/api/prompts/${promptId}/eval/gates/${gateId}`);
-    return res.data;
+  // Legacy aliases for backward compat with tests that pass gateId
+  async createGate(promptId: number | string, data: UpdateEvalGateRequest): Promise<EvalGate> {
+    return this.updateGate(promptId, data);
   }
 
-  async updateGate(promptId: string, gateId: string, data: UpdateEvalGateRequest): Promise<EvalGate> {
-    const res = await this.api.put<EvalGate>(`/api/prompts/${promptId}/eval/gates/${gateId}`, data);
-    return res.data;
+  async listGates(promptId: number | string): Promise<EvalGate[]> {
+    const gate = await this.getGate(promptId);
+    return [gate];
   }
 
-  async deleteGate(promptId: string, gateId: string): Promise<void> {
-    await this.api.delete(`/api/prompts/${promptId}/eval/gates/${gateId}`);
+  async deleteGate(promptId: number | string, _gateId?: string): Promise<void> {
+    // Reset gate to disabled
+    await this.updateGate(promptId, { enabled: false });
   }
 }

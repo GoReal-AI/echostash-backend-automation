@@ -3,7 +3,6 @@ import type {
   Project,
   CreateProjectRequest,
   UpdateProjectRequest,
-  PaginatedResponse,
 } from "../types/index.js";
 
 export class ProjectsClient {
@@ -14,8 +13,8 @@ export class ProjectsClient {
     return res.data;
   }
 
-  async list(): Promise<PaginatedResponse<Project>> {
-    const res = await this.api.get<PaginatedResponse<Project>>("/api/projects");
+  async list(): Promise<Project[]> {
+    const res = await this.api.get<Project[]>("/api/projects");
     return res.data;
   }
 
@@ -25,7 +24,7 @@ export class ProjectsClient {
   }
 
   async update(id: string, data: UpdateProjectRequest): Promise<Project> {
-    const res = await this.api.put<Project>(`/api/projects/${id}`, data);
+    const res = await this.api.patch<Project>(`/api/projects/${id}`, data);
     return res.data;
   }
 

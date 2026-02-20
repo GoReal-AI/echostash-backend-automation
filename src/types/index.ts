@@ -6,21 +6,26 @@
 
 export interface AuthTokens {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
+  expiresIn?: number;
 }
 
 export interface GuestAuthResponse {
   accessToken: string;
   refreshToken: string;
-  userType: string;
+  expiresIn: number;
+  isFirstLogin: boolean;
 }
 
 export interface UserProfile {
-  id: string;
-  email: string;
-  name: string;
-  userType: string;
-  createdAt: string;
+  sub: string;
+  acct_type: string;
+  scope: string;
+  exp: number;
+  planName: string;
+  email?: string;
+  name?: string;
+  picture?: string;
 }
 
 // --- Projects ---
@@ -29,9 +34,7 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
-  slug?: string;
-  createdAt: string;
-  updatedAt: string;
+  promptCount?: number;
 }
 
 export interface CreateProjectRequest {
@@ -47,39 +50,63 @@ export interface UpdateProjectRequest {
 // --- Prompts ---
 
 export interface Prompt {
-  id: string;
+  id: number;
   name: string;
-  content: string;
   description?: string;
-  projectId: string;
+  projectId?: number;
   visibility?: string;
+  publicSlug?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  // Only in detail response
+  publishedVersion?: PromptVersionDetail | null;
+  // Only in summary response
+  viewCount?: number;
+  upvoteCount?: number;
+  forkCount?: number;
+  // Only in create response
+  content?: unknown;
   tags?: Tag[];
-  latestVersion?: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreatePromptRequest {
   name: string;
-  content: string;
   description?: string;
-  projectId: string;
+  projectId: number | string;
   visibility?: string;
+  publicSlug?: string;
 }
 
 export interface UpdatePromptRequest {
   name?: string;
-  content?: string;
   description?: string;
+  visibility?: string;
+}
+
+export interface PromptVersionDetail {
+  id: number;
+  versionNo: number;
+  content: unknown[];
+  parameterSymbol?: string;
+  promptMetaData?: Record<string, unknown>;
+  createdAt: string;
+  changelog?: string;
 }
 
 export interface PromptVersion {
-  id: string;
-  promptId: string;
-  versionNumber: number;
-  content: string;
-  changeMessage?: string;
+  id: number;
+  versionNo: number;
   createdAt: string;
+  changelog?: string;
+  // Full detail fields (only in getVersion response)
+  content?: unknown[];
+  parameterSymbol?: string;
+  promptMetaData?: Record<string, unknown>;
+}
+
+export interface CreateVersionResponse {
+  id: number;
+  versionNo: number;
 }
 
 export interface CreateVersionRequest {
@@ -88,14 +115,18 @@ export interface CreateVersionRequest {
 }
 
 export interface PublishPromptRequest {
-  versionNumber: number;
-  releaseNotes?: string;
+  versionNo: number;
+}
+
+export interface PublishPromptResponse {
+  promptId: number;
+  versionId: number;
+  versionNo: number;
 }
 
 export interface PublishNewVersionRequest {
   content: string;
   changeMessage?: string;
-  releaseNotes?: string;
 }
 
 export interface UpdateVisibilityRequest {
@@ -103,18 +134,20 @@ export interface UpdateVisibilityRequest {
 }
 
 export interface PromptSearchParams {
-  query?: string;
-  projectId?: string;
-  tags?: string[];
+  name?: string;
+  projectId?: number | string;
+  tagIds?: number[];
   visibility?: string;
+  sortBy?: string;
+  sortDirection?: string;
   page?: number;
   size?: number;
-  sort?: string;
 }
 
 export interface SemanticSearchParams {
   query: string;
   limit?: number;
+  threshold?: number;
 }
 
 // --- Tags ---
@@ -138,7 +171,7 @@ export interface UpdateTagRequest {
 // --- API Keys ---
 
 export interface ApiKey {
-  id: string;
+  id: number;
   name: string;
   key?: string;
   prefix: string;
@@ -153,16 +186,28 @@ export interface CreateApiKeyRequest {
 // --- SDK ---
 
 export interface SdkPromptResponse {
-  id: string;
+  id: number;
   name: string;
-  content: string;
-  version?: number;
-  variables?: Record<string, string>;
+  description?: string;
+  content: unknown[] | null;
+  parameterSymbol?: string;
+  promptMetaData?: Record<string, unknown>;
+  publishedVersionNo?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SdkVersionResponse {
+  versionNo: number;
+  content: unknown[];
+  parameterSymbol?: string;
+  promptMetaData?: Record<string, unknown>;
+  createdAt: string;
 }
 
 export interface SdkRenderRequest {
-  promptId: string;
   variables?: Record<string, string>;
+  version?: string;
 }
 
 export interface SdkBatchRenderRequest {
@@ -170,25 +215,33 @@ export interface SdkBatchRenderRequest {
 }
 
 export interface SdkRenderItem {
-  promptId: string;
+  promptId: number | string;
+  version?: string;
   variables?: Record<string, string>;
 }
 
 export interface SdkRenderResponse {
-  rendered: string;
-  promptId: string;
-  version: number;
+  content: string;
+  promptId: number;
+  versionNo: number;
+}
+
+export interface SdkBatchRenderResponse {
+  results: Record<string, { content?: string; versionNo?: number; error?: string }>;
+  successCount: number;
+  errorCount: number;
 }
 
 // --- Eval ---
 
 export interface EvalDataset {
   id: string;
-  promptId: string;
+  promptId?: number;
   name: string;
   description?: string;
-  items: EvalDatasetItem[];
-  createdAt: string;
+  items?: EvalDatasetItem[];
+  cases?: EvalDatasetCase[];
+  createdAt?: string;
 }
 
 export interface EvalDatasetItem {
@@ -197,26 +250,32 @@ export interface EvalDatasetItem {
   expectedOutput?: string;
 }
 
+export interface EvalDatasetCase {
+  name: string;
+  variables: Record<string, string>;
+  expectedOutput?: string;
+}
+
 export interface CreateEvalDatasetRequest {
   name: string;
   description?: string;
-  items: EvalDatasetItem[];
+  items?: EvalDatasetItem[];
+  cases?: EvalDatasetCase[];
 }
 
 export interface UpdateEvalDatasetRequest {
   name?: string;
   description?: string;
-  items?: EvalDatasetItem[];
 }
 
 export interface EvalSuite {
-  id: string;
-  promptId: string;
+  id: number;
+  promptId?: number;
   name: string;
   description?: string;
   datasetId: string;
-  tests: EvalTest[];
-  createdAt: string;
+  tests?: EvalTest[];
+  createdAt?: string;
 }
 
 export interface CreateEvalSuiteRequest {
@@ -231,18 +290,18 @@ export interface UpdateEvalSuiteRequest {
 }
 
 export interface EvalTest {
-  id: string;
-  suiteId: string;
+  id: number;
+  suiteId?: number;
   name: string;
   type: string;
-  config: Record<string, unknown>;
-  createdAt: string;
+  config?: Record<string, unknown>;
+  createdAt?: string;
 }
 
 export interface CreateEvalTestRequest {
   name: string;
   type: string;
-  config: Record<string, unknown>;
+  config?: Record<string, unknown>;
 }
 
 export interface UpdateEvalTestRequest {
@@ -252,64 +311,82 @@ export interface UpdateEvalTestRequest {
 }
 
 export interface EvalRun {
-  id: string;
-  suiteId: string;
+  id: number;
+  suiteId?: number;
   status: string;
   results?: EvalRunResult[];
-  startedAt: string;
+  startedAt?: string;
   completedAt?: string;
 }
 
 export interface EvalRunResult {
-  testId: string;
-  passed: boolean;
+  testId?: number;
+  passed?: boolean;
   score?: number;
   details?: Record<string, unknown>;
 }
 
 export interface EvalGate {
-  id: string;
-  promptId: string;
-  suiteId: string;
-  threshold: number;
-  enabled: boolean;
-  createdAt: string;
-}
-
-export interface CreateEvalGateRequest {
-  suiteId: string;
-  threshold: number;
+  suiteId?: number;
+  threshold?: number;
   enabled?: boolean;
 }
 
 export interface UpdateEvalGateRequest {
+  suiteId?: number;
   threshold?: number;
   enabled?: boolean;
+}
+
+export interface RunSuiteRequest {
+  suiteId: number;
+  modelData?: Record<string, unknown>;
 }
 
 // --- Composites ---
 
 export interface Composite {
-  id: string;
-  name: string;
+  id?: number;
+  compositeId?: number;
+  versionNo?: number;
+  name?: string;
   description?: string;
-  projectId: string;
-  steps: CompositeStep[];
-  createdAt: string;
-  updatedAt: string;
+  ownerType?: string;
+  ownerId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  latestVersionNo?: number;
+  // Legacy fields for test compatibility
+  projectId?: string | number;
+  steps?: CompositeStep[];
 }
 
 export interface CompositeStep {
-  promptId: string;
-  order: number;
-  inputMapping?: Record<string, string>;
+  itemType?: string;
+  position?: number;
+  promptId?: number | string;
+  promptVersionNo?: number;
+  required?: boolean;
+  // Legacy
+  order?: number;
+}
+
+export interface CompositeItem {
+  itemType: string;
+  position: number;
+  promptId?: number;
+  promptVersionNo?: number;
+  required?: boolean;
 }
 
 export interface CreateCompositeRequest {
   name: string;
   description?: string;
-  projectId: string;
-  steps: CompositeStep[];
+  items?: CompositeItem[];
+  modelData?: Record<string, unknown>;
+  // Legacy
+  projectId?: string | number;
+  steps?: CompositeStep[];
 }
 
 export interface UpdateCompositeRequest {
@@ -364,9 +441,11 @@ export interface VariableUsageParams {
 // --- Billing ---
 
 export interface BillingProfile {
-  id: string;
-  plan: string;
   status: string;
+  planName: string;
+  managedByProvider: boolean;
+  startedAt: string | null;
+  expiresAt: string | null;
 }
 
 export interface BillingPortal {
@@ -427,10 +506,19 @@ export interface PromptPack {
 }
 
 export interface Plan {
-  id: string;
   name: string;
-  price: number;
-  features: string[];
+  metadata: {
+    title: string;
+    description: string;
+    price: number | null;
+    currency: string;
+    badge?: string | null;
+    ctaText?: string;
+    isVisible: boolean;
+    order: number;
+  };
+  billing: Record<string, unknown>;
+  quotas: Record<string, unknown>;
 }
 
 // --- Admin ---
@@ -451,9 +539,9 @@ export interface CreateShortLinkRequest {
 // --- PLP ---
 
 export interface PlpDiscovery {
-  name: string;
-  version: string;
-  endpoints: Record<string, string>;
+  server_name: string;
+  plp_version: string;
+  capabilities: Record<string, unknown>;
 }
 
 export interface PlpPrompt {

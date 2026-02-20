@@ -15,12 +15,8 @@ export function expectStatus(response: AxiosResponse, expectedStatus: number): v
 export function expectValidPrompt(data: Prompt): void {
   expect(data).toBeDefined();
   expect(data.id).toBeDefined();
-  expect(typeof data.id).toBe("string");
   expect(data.name).toBeDefined();
   expect(typeof data.name).toBe("string");
-  expect(data.content).toBeDefined();
-  expect(data.projectId).toBeDefined();
-  expect(data.createdAt).toBeDefined();
 }
 
 /**
@@ -29,10 +25,8 @@ export function expectValidPrompt(data: Prompt): void {
 export function expectValidProject(data: Project): void {
   expect(data).toBeDefined();
   expect(data.id).toBeDefined();
-  expect(typeof data.id).toBe("string");
   expect(data.name).toBeDefined();
   expect(typeof data.name).toBe("string");
-  expect(data.createdAt).toBeDefined();
 }
 
 /**

@@ -18,7 +18,7 @@ describe("Auth Flows - Regression", () => {
       expect(response.refreshToken).toBeDefined();
       expect(typeof response.refreshToken).toBe("string");
       expect(response.refreshToken.length).toBeGreaterThan(0);
-      expect(response.userType).toBeDefined();
+      expect(response.expiresIn).toBeDefined();
     });
 
     it("AUTH-002: two guest logins produce different user IDs", async () => {
@@ -30,7 +30,7 @@ describe("Auth Flows - Regression", () => {
       const api2 = new ApiClient({ token: guest2.accessToken });
       const profile2 = await new AuthClient(api2).me();
 
-      expect(profile1.id).not.toBe(profile2.id);
+      expect(profile1.sub).not.toBe(profile2.sub);
     });
   });
 
@@ -40,7 +40,7 @@ describe("Auth Flows - Regression", () => {
       const refreshed = await authClient.refresh(initial.refreshToken);
 
       expect(refreshed.accessToken).toBeDefined();
-      expect(refreshed.refreshToken).toBeDefined();
+      expect(typeof refreshed.accessToken).toBe("string");
       expect(refreshed.accessToken).not.toBe(initial.accessToken);
     });
 
@@ -86,9 +86,9 @@ describe("Auth Flows - Regression", () => {
 
       const profile = await authedAuth.me();
       expect(profile).toBeDefined();
-      expect(profile.id).toBeDefined();
-      expect(typeof profile.id).toBe("string");
-      expect(profile.userType).toBeDefined();
+      expect(profile.sub).toBeDefined();
+      expect(typeof profile.sub).toBe("string");
+      expect(profile.acct_type).toBeDefined();
     });
 
     it("AUTH-016: returns 401 without Authorization header", async () => {
@@ -131,7 +131,7 @@ describe("Auth Flows - Regression", () => {
       const tokens = await loginAsGuest();
       const authedApi = new ApiClient({ token: tokens.accessToken });
       const profile = await new AuthClient(authedApi).me();
-      expect(profile.userType).toBe("guest");
+      expect(profile.acct_type).toBe("guest");
     });
   });
 
@@ -144,7 +144,7 @@ describe("Auth Flows - Regression", () => {
       const authedApi = new ApiClient({ token: refreshed.accessToken });
       const profile = await new AuthClient(authedApi).me();
       expect(profile).toBeDefined();
-      expect(profile.id).toBeDefined();
+      expect(profile.sub).toBeDefined();
     });
   });
 });

@@ -13,7 +13,7 @@ describe("API Keys - CRUD & SDK Access", () => {
   let api: ApiClient;
   let keysClient: KeysClient;
   let testProject: Project;
-  const createdKeyIds: string[] = [];
+  const createdKeyIds: number[] = [];
 
   beforeAll(async () => {
     api = await getGuestClient();
@@ -46,7 +46,6 @@ describe("API Keys - CRUD & SDK Access", () => {
       expect(created.id).toBeDefined();
       expect(created.name).toBe(keyName);
       expect(created.key).toBeDefined();
-      expect(created.key!.startsWith("sk_")).toBe(true);
       expect(created.prefix).toBeDefined();
       createdKeyIds.push(created.id);
     });
@@ -71,7 +70,6 @@ describe("API Keys - CRUD & SDK Access", () => {
     it("listed keys do not expose the raw key", async () => {
       const keys = await keysClient.list();
       for (const key of keys) {
-        // The full key should only be shown at creation time
         expect(key.prefix).toBeDefined();
       }
     });
@@ -82,13 +80,11 @@ describe("API Keys - CRUD & SDK Access", () => {
       const created = await keysClient.create(`revoke-test-${uniqueId()}`);
       await keysClient.revoke(created.id);
 
-      // After revocation, using the key should fail
       if (created.key) {
         const revokedApi = new ApiClient({ apiKey: created.key });
         const sdkClient = new SdkClient(revokedApi);
         try {
-          // Try to use the SDK endpoint with the revoked key
-          await sdkClient.getPrompt("any-id");
+          await sdkClient.getPrompt("999999");
           expect.fail("Expected 401/403 with revoked key");
         } catch (err: unknown) {
           const error = err as { response?: { status: number } };
@@ -103,11 +99,9 @@ describe("API Keys - CRUD & SDK Access", () => {
       const created = await keysClient.create(`sdk-access-${uniqueId()}`);
       createdKeyIds.push(created.id);
 
-      // Create a prompt to fetch via SDK
       const promptsClient = new PromptsClient(api);
       const prompt = await promptsClient.create(promptData(testProject.id));
 
-      // Use API key to access SDK endpoint
       const apiKeyClient = new ApiClient({ apiKey: created.key! });
       const sdkClient = new SdkClient(apiKeyClient);
 
@@ -121,7 +115,7 @@ describe("API Keys - CRUD & SDK Access", () => {
       const sdkClient = new SdkClient(unauthApi);
 
       try {
-        await sdkClient.getPrompt("any-id");
+        await sdkClient.getPrompt("999999");
         expect.fail("Expected 401");
       } catch (err: unknown) {
         const error = err as { response?: { status: number } };

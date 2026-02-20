@@ -32,16 +32,14 @@ describe("Eval - Runs", () => {
     projectsClient = new ProjectsClient(api);
 
     testProject = await projectsClient.create(projectData());
-    testPrompt = await promptsClient.create(
-      promptData(testProject.id, { content: "Hello {{name}}, welcome to {{place}}!" })
-    );
+    testPrompt = await promptsClient.create(promptData(testProject.id));
 
     // Create and publish a version
     const version = await promptsClient.createVersion(
       testPrompt.id,
       versionData({ content: "Hello {{name}}, welcome to {{place}}!" })
     );
-    await promptsClient.publish(testPrompt.id, { versionNumber: version.versionNumber });
+    await promptsClient.publish(testPrompt.id, { versionNo: version.versionNo });
 
     // Create dataset, suite, and test
     testDataset = await evalClient.createDataset(testPrompt.id, evalDatasetData());
@@ -69,10 +67,11 @@ describe("Eval - Runs", () => {
   });
 
   describe("List Runs (EVAL-021)", () => {
-    it("EVAL-021: lists runs for a suite", async () => {
-      const runs = await evalClient.listRuns(testPrompt.id, testSuite.id);
-      expect(Array.isArray(runs)).toBe(true);
-      expect(runs.length).toBeGreaterThan(0);
+    it("EVAL-021: lists runs for a prompt", async () => {
+      const runsPage = await evalClient.listRuns(testPrompt.id, testSuite.id);
+      expect(runsPage).toBeDefined();
+      expect(runsPage.content).toBeDefined();
+      expect(runsPage.content.length).toBeGreaterThan(0);
     });
   });
 

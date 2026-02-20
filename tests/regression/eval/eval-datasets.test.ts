@@ -22,9 +22,7 @@ describe("Eval - Datasets", () => {
     promptsClient = new PromptsClient(api);
     projectsClient = new ProjectsClient(api);
     testProject = await projectsClient.create(projectData());
-    testPrompt = await promptsClient.create(
-      promptData(testProject.id, { content: "Eval test {{name}} {{place}}" })
-    );
+    testPrompt = await promptsClient.create(promptData(testProject.id));
   });
 
   afterAll(async () => {

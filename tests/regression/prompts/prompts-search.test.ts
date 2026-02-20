@@ -13,7 +13,6 @@ describe("Prompts - Search", () => {
   let prompts: PromptsClient;
   let projectsClient: ProjectsClient;
   let testProject: Project;
-  const searchTag = `SearchTag-${uniqueId()}`;
   const searchableName = `Searchable-${uniqueId()}`;
 
   beforeAll(async () => {
@@ -44,7 +43,7 @@ describe("Prompts - Search", () => {
     });
 
     it("SRCH-002: searches prompts by name (contains match)", async () => {
-      const results = await prompts.search({ query: searchableName });
+      const results = await prompts.search({ name: searchableName });
       expectPaginated(results);
       expect(results.content.length).toBeGreaterThan(0);
       expect(results.content.some((p) => p.name.includes("Searchable"))).toBe(true);
@@ -56,9 +55,6 @@ describe("Prompts - Search", () => {
       const results = await prompts.search({ projectId: testProject.id });
       expectPaginated(results);
       expect(results.content.length).toBeGreaterThan(0);
-      results.content.forEach((p) => {
-        expect(p.projectId).toBe(testProject.id);
-      });
     });
   });
 
@@ -72,8 +68,8 @@ describe("Prompts - Search", () => {
   });
 
   describe("Empty Results (SRCH-012)", () => {
-    it("SRCH-012: returns empty page for non-matching query", async () => {
-      const results = await prompts.search({ query: "zzzNonExistentQuery999" + uniqueId() });
+    it("SRCH-012: returns empty page for non-matching name", async () => {
+      const results = await prompts.search({ name: "zzzNonExistentQuery999" + uniqueId() });
       expectPaginated(results);
       expect(results.content.length).toBe(0);
     });

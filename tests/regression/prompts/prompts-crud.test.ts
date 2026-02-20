@@ -31,19 +31,18 @@ describe("Prompts - Full CRUD", () => {
   });
 
   describe("Create (PRMT-001 through PRMT-003)", () => {
-    it("PRMT-001: creates with minimal fields (name + content + projectId)", async () => {
+    it("PRMT-001: creates with minimal fields (name + projectId)", async () => {
       const data = promptData(testProject.id);
       const prompt = await prompts.create(data);
 
       expectValidPrompt(prompt);
       expect(prompt.name).toBe(data.name);
-      expect(prompt.projectId).toBe(testProject.id);
+      expect(prompt.projectId).toBe(Number(testProject.id));
     });
 
     it("PRMT-002: creates with all fields (name, description, projectId, visibility)", async () => {
       const data = new PromptBuilder(testProject.id)
         .withName(`Full Prompt ${uniqueId()}`)
-        .withContent("Complete prompt content {{var}}")
         .withDescription("A detailed prompt description")
         .withVisibility("private")
         .build();
@@ -96,7 +95,7 @@ describe("Prompts - Full CRUD", () => {
 
     it("PRMT-006: returns 404 for non-existent prompt", async () => {
       try {
-        await prompts.get("non-existent-" + uniqueId());
+        await prompts.get("999999999");
         expect.fail("Expected 404");
       } catch (err: unknown) {
         const error = err as { response?: { status: number } };
@@ -137,12 +136,11 @@ describe("Prompts - Full CRUD", () => {
 
     it("PRMT-010: updates prompt visibility", async () => {
       try {
-        const updated = await prompts.updateVisibility(testPrompt.id, { visibility: "public" });
-        expect(updated).toBeDefined();
+        await prompts.updateVisibility(testPrompt.id, { visibility: "public" });
       } catch (err: unknown) {
         // Some APIs may not support visibility toggle for guest users
         const error = err as { response?: { status: number } };
-        expect([200, 403]).toContain(error.response?.status ?? 200);
+        expect([200, 204, 403]).toContain(error.response?.status ?? 204);
       }
     });
   });

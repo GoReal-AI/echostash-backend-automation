@@ -14,11 +14,10 @@ describe("Health & Smoke Tests", () => {
   });
 
   it("GET /.well-known/plp returns PLP discovery document", async () => {
-    const plpClient = new PlpClient(api);
-    const discovery = await plpClient.discover();
-    expect(discovery).toBeDefined();
-    expect(discovery.name).toBeDefined();
-    expect(discovery.version).toBeDefined();
+    const res = await api.get<Record<string, unknown>>("/.well-known/plp");
+    expect(res.data).toBeDefined();
+    expect(res.data.plp_version || res.data.version).toBeDefined();
+    expect(res.data.server_name || res.data.name).toBeDefined();
   });
 
   it("POST /auth/guest returns a guest token", async () => {

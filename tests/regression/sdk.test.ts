@@ -15,7 +15,7 @@ describe("SDK Endpoints", () => {
   let sdkClient: SdkClient;
   let testProject: Project;
   let testPrompt: Prompt;
-  let apiKeyId: string;
+  let apiKeyId: number;
 
   beforeAll(async () => {
     jwtApi = await getGuestClient();
@@ -32,14 +32,13 @@ describe("SDK Endpoints", () => {
     testProject = await projectsClient.create(projectData());
 
     const promptsClient = new PromptsClient(jwtApi);
-    testPrompt = await promptsClient.create(
-      promptData(testProject.id, {
-        content: "Hello {{name}}, welcome to {{place}}!",
-      })
-    );
+    testPrompt = await promptsClient.create(promptData(testProject.id));
 
-    // Create a second version
-    await promptsClient.createVersion(testPrompt.id, versionData({ content: "Goodbye {{name}}!" }));
+    // Create and publish a version
+    const version = await promptsClient.createVersion(testPrompt.id, versionData({
+      content: "Hello {{name}}, welcome to {{place}}!",
+    }));
+    await promptsClient.publish(testPrompt.id, { versionNo: version.versionNo });
   });
 
   afterAll(async () => {
@@ -57,12 +56,11 @@ describe("SDK Endpoints", () => {
       expect(result).toBeDefined();
       expect(result.id).toBe(testPrompt.id);
       expect(result.name).toBe(testPrompt.name);
-      expect(result.content).toBeDefined();
     });
 
     it("returns 404 for non-existent prompt", async () => {
       try {
-        await sdkClient.getPrompt("non-existent-id-000");
+        await sdkClient.getPrompt("999999999");
         expect.fail("Expected 404");
       } catch (err: unknown) {
         const error = err as { response?: { status: number } };
@@ -75,7 +73,7 @@ describe("SDK Endpoints", () => {
     it("fetches a specific version of a prompt", async () => {
       const result = await sdkClient.getPromptVersion(testPrompt.id, 1);
       expect(result).toBeDefined();
-      expect(result.id).toBe(testPrompt.id);
+      expect(result.versionNo).toBeDefined();
     });
   });
 
@@ -86,16 +84,16 @@ describe("SDK Endpoints", () => {
         place: "Wonderland",
       });
       expect(result).toBeDefined();
-      expect(result.rendered).toBeDefined();
-      expect(result.rendered).toContain("Alice");
-      expect(result.rendered).toContain("Wonderland");
+      expect(result.content).toBeDefined();
+      expect(result.content).toContain("Alice");
+      expect(result.content).toContain("Wonderland");
       expect(result.promptId).toBe(testPrompt.id);
     });
 
     it("renders a prompt without variables (raw content)", async () => {
       const result = await sdkClient.render(testPrompt.id);
       expect(result).toBeDefined();
-      expect(result.rendered).toBeDefined();
+      expect(result.content).toBeDefined();
     });
   });
 
@@ -105,23 +103,15 @@ describe("SDK Endpoints", () => {
         { promptId: testPrompt.id, variables: { name: "Alice", place: "Wonderland" } },
         { promptId: testPrompt.id, variables: { name: "Bob", place: "Earth" } },
       ]);
-      expect(Array.isArray(results)).toBe(true);
-      expect(results.length).toBe(2);
-      expect(results[0].rendered).toContain("Alice");
-      expect(results[1].rendered).toContain("Bob");
+      expect(results).toBeDefined();
+      expect(results.successCount).toBe(2);
     });
 
     it("returns error for non-existent prompt in batch", async () => {
-      try {
-        await sdkClient.batchRender([
-          { promptId: "non-existent-id", variables: {} },
-        ]);
-        expect.fail("Expected error for non-existent prompt");
-      } catch (err: unknown) {
-        const error = err as { response?: { status: number } };
-        expect(error.response).toBeDefined();
-        expect(error.response?.status).toBeGreaterThanOrEqual(400);
-      }
+      const results = await sdkClient.batchRender([
+        { promptId: 999999999, variables: {} },
+      ]);
+      expect(results.errorCount).toBeGreaterThan(0);
     });
   });
 });

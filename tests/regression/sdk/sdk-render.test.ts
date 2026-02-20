@@ -5,8 +5,7 @@ import { ProjectsClient } from "@clients/projects-client";
 import { SdkClient } from "@clients/sdk-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData, versionData } from "@fixtures/test-data";
-import { uniqueId } from "@utils/index";
-import type { Project, Prompt, PromptVersion } from "@api-types/index";
+import type { Project, Prompt } from "@api-types/index";
 
 describe("SDK - Render", () => {
   let api: ApiClient;
@@ -23,13 +22,11 @@ describe("SDK - Render", () => {
     projectsClient = new ProjectsClient(api);
 
     testProject = await projectsClient.create(projectData());
-    testPrompt = await prompts.create(
-      promptData(testProject.id, { content: "Hello {{name}}, welcome to {{place}}!" })
-    );
+    testPrompt = await prompts.create(promptData(testProject.id));
     const version = await prompts.createVersion(testPrompt.id, versionData({
       content: "Hello {{name}}, welcome to {{place}}!",
     }));
-    await prompts.publish(testPrompt.id, { versionNumber: version.versionNumber });
+    await prompts.publish(testPrompt.id, { versionNo: version.versionNo });
   });
 
   afterAll(async () => {
@@ -47,22 +44,20 @@ describe("SDK - Render", () => {
         place: "Wonderland",
       });
       expect(result).toBeDefined();
-      expect(result.rendered).toBeDefined();
+      expect(result.content).toBeDefined();
       expect(result.promptId).toBe(testPrompt.id);
     });
 
     it("SDK-014: renders without variables (plain template)", async () => {
-      const plainPrompt = await prompts.create(
-        promptData(testProject.id, { content: "Static content with no variables" })
-      );
+      const plainPrompt = await prompts.create(promptData(testProject.id));
       const version = await prompts.createVersion(plainPrompt.id, versionData({
         content: "Static content with no variables",
       }));
-      await prompts.publish(plainPrompt.id, { versionNumber: version.versionNumber });
+      await prompts.publish(plainPrompt.id, { versionNo: version.versionNo });
 
       const result = await sdk.render(plainPrompt.id);
       expect(result).toBeDefined();
-      expect(result.rendered).toBeDefined();
+      expect(result.content).toBeDefined();
     });
   });
 
@@ -72,7 +67,6 @@ describe("SDK - Render", () => {
 
       try {
         await sdk.render(unpublished.id, { name: "Test" });
-        // Some APIs may return an error in the response body rather than a status code
       } catch (err: unknown) {
         const error = err as { response?: { status: number } };
         expect([400, 404]).toContain(error.response?.status);

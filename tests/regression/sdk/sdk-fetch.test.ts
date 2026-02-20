@@ -6,7 +6,7 @@ import { SdkClient } from "@clients/sdk-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData, versionData } from "@fixtures/test-data";
 import { uniqueId } from "@utils/index";
-import type { Project, Prompt, PromptVersion } from "@api-types/index";
+import type { Project, Prompt, CreateVersionResponse } from "@api-types/index";
 
 describe("SDK - Fetch", () => {
   let api: ApiClient;
@@ -15,7 +15,7 @@ describe("SDK - Fetch", () => {
   let projectsClient: ProjectsClient;
   let testProject: Project;
   let testPrompt: Prompt;
-  let publishedVersion: PromptVersion;
+  let publishedVersionNo: number;
 
   beforeAll(async () => {
     api = await getGuestClient();
@@ -24,15 +24,12 @@ describe("SDK - Fetch", () => {
     projectsClient = new ProjectsClient(api);
 
     testProject = await projectsClient.create(projectData());
-    testPrompt = await prompts.create(
-      promptData(testProject.id, { content: "Hello {{name}}!" })
-    );
-    publishedVersion = await prompts.createVersion(testPrompt.id, versionData({
+    testPrompt = await prompts.create(promptData(testProject.id));
+    const version = await prompts.createVersion(testPrompt.id, versionData({
       content: "Hello {{name}}!",
     }));
-    await prompts.publish(testPrompt.id, {
-      versionNumber: publishedVersion.versionNumber,
-    });
+    publishedVersionNo = version.versionNo;
+    await prompts.publish(testPrompt.id, { versionNo: publishedVersionNo });
   });
 
   afterAll(async () => {
@@ -56,11 +53,9 @@ describe("SDK - Fetch", () => {
       const unpublished = await prompts.create(promptData(testProject.id));
       try {
         const result = await sdk.getPrompt(unpublished.id);
-        // If the API returns 200, content may be null for unpublished
         expect(result).toBeDefined();
         expect(result.id).toBe(unpublished.id);
       } catch (err: unknown) {
-        // Some APIs may return 404 if no published version
         const error = err as { response?: { status: number } };
         expect([200, 404]).toContain(error.response?.status ?? 200);
       }
@@ -69,9 +64,9 @@ describe("SDK - Fetch", () => {
 
   describe("Fetch by Version (SDK-006, SDK-007)", () => {
     it("SDK-006: fetches specific version", async () => {
-      const result = await sdk.getPromptVersion(testPrompt.id, publishedVersion.versionNumber);
+      const result = await sdk.getPromptVersion(testPrompt.id, publishedVersionNo);
       expect(result).toBeDefined();
-      expect(result.id).toBe(testPrompt.id);
+      expect(result.versionNo).toBe(publishedVersionNo);
     });
 
     it("SDK-007: returns 404 for non-existent version", async () => {
@@ -101,7 +96,7 @@ describe("SDK - Fetch", () => {
 
     it("SDK-004: returns 404 for non-existent prompt", async () => {
       try {
-        await sdk.getPrompt("non-existent-" + uniqueId());
+        await sdk.getPrompt("999999999");
         expect.fail("Expected 404");
       } catch (err: unknown) {
         const error = err as { response?: { status: number } };

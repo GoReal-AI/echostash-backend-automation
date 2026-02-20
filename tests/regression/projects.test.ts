@@ -4,7 +4,7 @@ import { ProjectsClient } from "@clients/projects-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData } from "@fixtures/test-data";
 import { ProjectBuilder } from "@fixtures/builders";
-import { expectValidProject, expectPaginated } from "@helpers/assertions";
+import { expectValidProject } from "@helpers/assertions";
 import type { Project } from "@api-types/index";
 
 describe("Projects - CRUD", () => {
@@ -86,10 +86,10 @@ describe("Projects - CRUD", () => {
       expect(fetched.name).toBe(testProject.name);
     });
 
-    it("lists projects (paginated)", async () => {
+    it("lists projects", async () => {
       const list = await projects.list();
-      expectPaginated(list);
-      expect(list.content.length).toBeGreaterThan(0);
+      expect(Array.isArray(list)).toBe(true);
+      expect(list.length).toBeGreaterThan(0);
     });
 
     it("returns 404 for non-existent project", async () => {

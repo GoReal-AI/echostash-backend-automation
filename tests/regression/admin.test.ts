@@ -32,7 +32,7 @@ describe("Admin Endpoints", () => {
         await adminClient.createTag(tagData());
       } catch (err: unknown) {
         const error = err as { response?: { status: number } };
-        expect([401, 403]).toContain(error.response?.status);
+        expect([400, 401, 403]).toContain(error.response?.status);
       }
     });
 

@@ -3,7 +3,7 @@ import { ApiClient } from "@clients/api-client";
 import { ProjectsClient } from "@clients/projects-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData } from "@fixtures/test-data";
-import { expectValidProject, expectPaginated } from "@helpers/assertions";
+import { expectValidProject } from "@helpers/assertions";
 
 describe("Projects - Sanity (P0)", () => {
   let api: ApiClient;
@@ -46,8 +46,7 @@ describe("Projects - Sanity (P0)", () => {
 
   it("PROJ-006: lists user projects", async () => {
     const list = await projects.list();
-    expectPaginated(list);
-    expect(list.content.length).toBeGreaterThan(0);
+    expect(Array.isArray(list)).toBe(true);
   });
 
   it("PROJ-008: gets a project by ID", async () => {

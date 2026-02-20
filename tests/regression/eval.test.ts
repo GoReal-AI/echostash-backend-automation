@@ -29,9 +29,7 @@ describe("Eval Framework", () => {
     testProject = await projectsClient.create(projectData());
 
     const promptsClient = new PromptsClient(api);
-    testPrompt = await promptsClient.create(
-      promptData(testProject.id, { content: "Hello {{name}}!" })
-    );
+    testPrompt = await promptsClient.create(promptData(testProject.id));
   });
 
   afterAll(async () => {
@@ -234,9 +232,10 @@ describe("Eval Framework", () => {
 
     it("lists runs for a suite", async () => {
       await evalClient.startRun(testPrompt.id, testSuite.id);
-      const runs = await evalClient.listRuns(testPrompt.id, testSuite.id);
-      expect(Array.isArray(runs)).toBe(true);
-      expect(runs.length).toBeGreaterThan(0);
+      const runsPage = await evalClient.listRuns(testPrompt.id, testSuite.id);
+      expect(runsPage).toBeDefined();
+      expect(runsPage.content).toBeDefined();
+      expect(runsPage.content.length).toBeGreaterThan(0);
     });
 
     it("gets a run by ID", async () => {
@@ -255,26 +254,23 @@ describe("Eval Framework", () => {
       testSuite = await evalClient.createSuite(testPrompt.id, evalSuiteData(testDataset.id));
     });
 
-    it("creates a gate", async () => {
+    it("creates/updates a gate", async () => {
       const data = evalGateData(testSuite.id);
       const gate = await evalClient.createGate(testPrompt.id, data);
 
       expect(gate).toBeDefined();
-      expect(gate.id).toBeDefined();
       expect(gate.suiteId).toBe(testSuite.id);
       expect(gate.threshold).toBe(0.8);
       expect(gate.enabled).toBe(true);
     });
 
-    it("lists gates for a prompt", async () => {
-      const gates = await evalClient.listGates(testPrompt.id);
-      expect(Array.isArray(gates)).toBe(true);
-      expect(gates.length).toBeGreaterThan(0);
+    it("gets gate for a prompt", async () => {
+      const gate = await evalClient.getGate(testPrompt.id);
+      expect(gate).toBeDefined();
     });
 
     it("updates a gate", async () => {
-      const created = await evalClient.createGate(testPrompt.id, evalGateData(testSuite.id));
-      const updated = await evalClient.updateGate(testPrompt.id, created.id, {
+      const updated = await evalClient.updateGate(testPrompt.id, {
         threshold: 0.95,
         enabled: false,
       });
@@ -282,17 +278,10 @@ describe("Eval Framework", () => {
       expect(updated.enabled).toBe(false);
     });
 
-    it("deletes a gate", async () => {
-      const created = await evalClient.createGate(testPrompt.id, evalGateData(testSuite.id));
-      await evalClient.deleteGate(testPrompt.id, created.id);
-
-      try {
-        await evalClient.getGate(testPrompt.id, created.id);
-        expect.fail("Expected 404");
-      } catch (err: unknown) {
-        const error = err as { response?: { status: number } };
-        expect(error.response?.status).toBe(404);
-      }
+    it("disables a gate (delete equivalent)", async () => {
+      await evalClient.deleteGate(testPrompt.id);
+      const gate = await evalClient.getGate(testPrompt.id);
+      expect(gate.enabled).toBe(false);
     });
   });
 });

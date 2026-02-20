@@ -26,13 +26,13 @@ describe("SDK - Batch Render", () => {
     testProject = await projectsClient.create(projectData());
 
     // Create and publish two prompts
-    prompt1 = await prompts.create(promptData(testProject.id, { content: "Prompt1 {{name}}" }));
+    prompt1 = await prompts.create(promptData(testProject.id));
     const v1 = await prompts.createVersion(prompt1.id, versionData({ content: "Prompt1 {{name}}" }));
-    await prompts.publish(prompt1.id, { versionNumber: v1.versionNumber });
+    await prompts.publish(prompt1.id, { versionNo: v1.versionNo });
 
-    prompt2 = await prompts.create(promptData(testProject.id, { content: "Prompt2 {{name}}" }));
+    prompt2 = await prompts.create(promptData(testProject.id));
     const v2 = await prompts.createVersion(prompt2.id, versionData({ content: "Prompt2 {{name}}" }));
-    await prompts.publish(prompt2.id, { versionNumber: v2.versionNumber });
+    await prompts.publish(prompt2.id, { versionNo: v2.versionNo });
   });
 
   afterAll(async () => {
@@ -50,25 +50,20 @@ describe("SDK - Batch Render", () => {
         { promptId: prompt2.id, variables: { name: "Bob" } },
       ]);
 
-      expect(Array.isArray(results)).toBe(true);
-      expect(results.length).toBe(2);
+      expect(results).toBeDefined();
+      expect(results.successCount).toBe(2);
     });
   });
 
   describe("Mixed Results (SDK-017)", () => {
     it("SDK-017: batch with one valid and one non-existent prompt", async () => {
-      try {
-        const results = await sdk.batchRender([
-          { promptId: prompt1.id, variables: { name: "Alice" } },
-          { promptId: "non-existent-" + uniqueId(), variables: { name: "Ghost" } },
-        ]);
-        // The batch may still return partial results
-        expect(results).toBeDefined();
-      } catch (err: unknown) {
-        // Some APIs may reject the entire batch
-        const error = err as { response?: { status: number } };
-        expect(error.response).toBeDefined();
-      }
+      const results = await sdk.batchRender([
+        { promptId: prompt1.id, variables: { name: "Alice" } },
+        { promptId: 999999999, variables: { name: "Ghost" } },
+      ]);
+      expect(results).toBeDefined();
+      expect(results.successCount).toBe(1);
+      expect(results.errorCount).toBe(1);
     });
   });
 

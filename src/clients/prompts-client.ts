@@ -5,7 +5,9 @@ import type {
   UpdatePromptRequest,
   PromptVersion,
   CreateVersionRequest,
+  CreateVersionResponse,
   PublishPromptRequest,
+  PublishPromptResponse,
   PublishNewVersionRequest,
   UpdateVisibilityRequest,
   PromptSearchParams,
@@ -17,64 +19,62 @@ export class PromptsClient {
   constructor(private api: ApiClient) {}
 
   async create(data: CreatePromptRequest): Promise<Prompt> {
-    const res = await this.api.post<Prompt>("/api/prompts", data);
+    const res = await this.api.post<Prompt>("/api/prompts/create", data);
     return res.data;
   }
 
-  async get(id: string): Promise<Prompt> {
+  async get(id: number | string): Promise<Prompt> {
     const res = await this.api.get<Prompt>(`/api/prompts/${id}`);
     return res.data;
   }
 
-  async list(projectId: string, params?: { page?: number; size?: number }): Promise<PaginatedResponse<Prompt>> {
+  async list(projectId: number | string, params?: { page?: number; size?: number }): Promise<PaginatedResponse<Prompt>> {
     const res = await this.api.get<PaginatedResponse<Prompt>>("/api/prompts", {
       params: { projectId, ...params },
     });
     return res.data;
   }
 
-  async update(id: string, data: UpdatePromptRequest): Promise<Prompt> {
-    const res = await this.api.put<Prompt>(`/api/prompts/${id}`, data);
+  async update(id: number | string, data: UpdatePromptRequest): Promise<Prompt> {
+    const res = await this.api.patch<Prompt>(`/api/prompts/${id}`, data);
     return res.data;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: number | string): Promise<void> {
     await this.api.delete(`/api/prompts/${id}`);
   }
 
-  async createVersion(promptId: string, data: CreateVersionRequest): Promise<PromptVersion> {
-    const res = await this.api.post<PromptVersion>(`/api/prompts/${promptId}/versions`, data);
+  async createVersion(promptId: number | string, data: CreateVersionRequest): Promise<CreateVersionResponse> {
+    const res = await this.api.post<CreateVersionResponse>(`/api/prompts/${promptId}/versions`, data);
     return res.data;
   }
 
-  async listVersions(promptId: string): Promise<PromptVersion[]> {
+  async listVersions(promptId: number | string): Promise<PromptVersion[]> {
     const res = await this.api.get<PromptVersion[]>(`/api/prompts/${promptId}/versions`);
     return res.data;
   }
 
-  async getVersion(promptId: string, versionNo: number): Promise<PromptVersion> {
+  async getVersion(promptId: number | string, versionNo: number): Promise<PromptVersion> {
     const res = await this.api.get<PromptVersion>(`/api/prompts/${promptId}/versions/${versionNo}`);
     return res.data;
   }
 
-  async publish(promptId: string, data: PublishPromptRequest): Promise<Prompt> {
-    const res = await this.api.post<Prompt>(`/api/prompts/${promptId}/publish`, data);
+  async publish(promptId: number | string, data: PublishPromptRequest): Promise<PublishPromptResponse> {
+    const res = await this.api.post<PublishPromptResponse>(`/api/prompts/${promptId}/publish`, data);
     return res.data;
   }
 
-  async publishNewVersion(promptId: string, data: PublishNewVersionRequest): Promise<Prompt> {
-    const res = await this.api.post<Prompt>(`/api/prompts/${promptId}/publish-new`, data);
+  async publishNewVersion(promptId: number | string, data: PublishNewVersionRequest): Promise<PublishPromptResponse> {
+    const res = await this.api.post<PublishPromptResponse>(`/api/prompts/${promptId}/publish-new-version`, data);
     return res.data;
   }
 
-  async updateVisibility(promptId: string, data: UpdateVisibilityRequest): Promise<Prompt> {
-    const res = await this.api.patch<Prompt>(`/api/prompts/${promptId}/visibility`, data);
-    return res.data;
+  async updateVisibility(promptId: number | string, data: UpdateVisibilityRequest): Promise<void> {
+    await this.api.put(`/api/prompts/${promptId}/visibility`, data);
   }
 
-  async addTags(promptId: string, tagIds: string[]): Promise<Prompt> {
-    const res = await this.api.post<Prompt>(`/api/prompts/${promptId}/tags`, { tagIds });
-    return res.data;
+  async addTags(promptId: number | string, tagIds: number[]): Promise<void> {
+    await this.api.post(`/api/prompts/${promptId}/tags`, { tagIds });
   }
 
   async search(params: PromptSearchParams): Promise<PaginatedResponse<Prompt>> {
@@ -84,7 +84,7 @@ export class PromptsClient {
 
   async semanticSearch(query: string, limit?: number): Promise<Prompt[]> {
     const params: SemanticSearchParams = { query, limit };
-    const res = await this.api.get<Prompt[]>("/api/prompts/semantic-search", { params });
+    const res = await this.api.get<Prompt[]>("/api/prompts/search/semantic/my", { params });
     return res.data;
   }
 

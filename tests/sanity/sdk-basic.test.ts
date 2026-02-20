@@ -5,7 +5,7 @@ import { ProjectsClient } from "@clients/projects-client";
 import { SdkClient } from "@clients/sdk-client";
 import { getGuestClient } from "@helpers/auth";
 import { projectData, promptData, versionData } from "@fixtures/test-data";
-import type { Project, Prompt, PromptVersion } from "@api-types/index";
+import type { Project, Prompt } from "@api-types/index";
 
 describe("SDK - Sanity (P0)", () => {
   let api: ApiClient;
@@ -14,7 +14,7 @@ describe("SDK - Sanity (P0)", () => {
   let projectsClient: ProjectsClient;
   let testProject: Project;
   let testPrompt: Prompt;
-  let publishedVersion: PromptVersion;
+  let publishedVersionNo: number;
 
   beforeAll(async () => {
     api = await getGuestClient();
@@ -24,17 +24,12 @@ describe("SDK - Sanity (P0)", () => {
 
     // Setup: create project -> prompt -> version -> publish
     testProject = await projectsClient.create(projectData());
-    testPrompt = await prompts.create(
-      promptData(testProject.id, {
-        content: "Hello {{name}}, welcome to {{place}}!",
-      })
-    );
-    publishedVersion = await prompts.createVersion(testPrompt.id, versionData({
+    testPrompt = await prompts.create(promptData(testProject.id));
+    const version = await prompts.createVersion(testPrompt.id, versionData({
       content: "Hello {{name}}, welcome to {{place}}!",
     }));
-    await prompts.publish(testPrompt.id, {
-      versionNumber: publishedVersion.versionNumber,
-    });
+    publishedVersionNo = version.versionNo;
+    await prompts.publish(testPrompt.id, { versionNo: publishedVersionNo });
   });
 
   afterAll(async () => {
@@ -72,12 +67,11 @@ describe("SDK - Sanity (P0)", () => {
       place: "Wonderland",
     });
     expect(result).toBeDefined();
-    expect(result.rendered).toBeDefined();
+    expect(result.content).toBeDefined();
     expect(result.promptId).toBe(testPrompt.id);
   });
 
   it("SDK-003: returns 404 for non-owned prompt", async () => {
-    // Create a second guest user
     const otherApi = await getGuestClient();
     const otherSdk = new SdkClient(otherApi);
 

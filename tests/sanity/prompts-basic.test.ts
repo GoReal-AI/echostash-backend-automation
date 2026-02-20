@@ -34,7 +34,7 @@ describe("Prompts - Sanity (P0)", () => {
 
     expectValidPrompt(prompt);
     expect(prompt.name).toBe(data.name);
-    expect(prompt.projectId).toBe(testProject.id);
+    expect(prompt.projectId).toBe(Number(testProject.id));
   });
 
   it("PRMT-004: gets a prompt by ID", async () => {

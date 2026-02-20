@@ -18,7 +18,7 @@ const environments: Record<string, EnvConfig> = {
     maxRetries: 2,
   },
   stage: {
-    apiUrl: "https://stage-api.echostash.com",
+    apiUrl: process.env.STAGE_API_URL || "https://gra-echostash-be-stage.up.railway.app",
     env: "stage",
     timeout: 30_000,
     logging: false,

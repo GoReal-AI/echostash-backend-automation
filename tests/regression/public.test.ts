@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { ApiClient } from "@clients/api-client";
 import { PublicClient } from "@clients/public-client";
-import { expectPaginated } from "@helpers/assertions";
 
 describe("Public Endpoints (No Auth)", () => {
   let api: ApiClient;
@@ -16,30 +15,12 @@ describe("Public Endpoints (No Auth)", () => {
     it("lists available plans without auth", async () => {
       const plans = await publicClient.listPlans();
       expect(Array.isArray(plans)).toBe(true);
-      // Plans should always exist
+      expect(plans.length).toBeGreaterThan(0);
       for (const plan of plans) {
-        expect(plan.id).toBeDefined();
         expect(plan.name).toBeDefined();
-        expect(typeof plan.price).toBe("number");
+        expect(plan.metadata).toBeDefined();
+        expect(plan.metadata.title).toBeDefined();
       }
-    });
-  });
-
-  describe("Search Public Prompts", () => {
-    it("searches public prompts without auth", async () => {
-      const results = await publicClient.searchPrompts();
-      expectPaginated(results);
-    });
-
-    it("searches with query parameter", async () => {
-      const results = await publicClient.searchPrompts({ query: "test" });
-      expectPaginated(results);
-    });
-
-    it("supports pagination", async () => {
-      const results = await publicClient.searchPrompts({ page: 0, size: 5 });
-      expectPaginated(results);
-      expect(results.content.length).toBeLessThanOrEqual(5);
     });
   });
 

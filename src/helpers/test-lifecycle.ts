@@ -2,7 +2,7 @@ import { ApiClient } from "../clients/api-client.js";
 import { ProjectsClient } from "../clients/projects-client.js";
 import { PromptsClient } from "../clients/prompts-client.js";
 import { uniqueId } from "../utils/index.js";
-import type { Project, Prompt, PromptVersion } from "../types/index.js";
+import type { Project, Prompt, CreateVersionResponse } from "../types/index.js";
 
 /** IDs of resources created during the test run, for cleanup. */
 const createdProjectIds: string[] = [];
@@ -28,13 +28,12 @@ export async function createTestProject(
  */
 export async function createTestPrompt(
   api: ApiClient,
-  projectId: string,
-  overrides?: { name?: string; content?: string }
+  projectId: number | string,
+  overrides?: { name?: string }
 ): Promise<Prompt> {
   const client = new PromptsClient(api);
   return client.create({
     name: overrides?.name || `Test Prompt ${uniqueId()}`,
-    content: overrides?.content || "Hello {{name}}, this is a test prompt.",
     projectId,
   });
 }
@@ -44,9 +43,9 @@ export async function createTestPrompt(
  */
 export async function createTestVersion(
   api: ApiClient,
-  promptId: string,
+  promptId: number | string,
   content?: string
-): Promise<PromptVersion> {
+): Promise<CreateVersionResponse> {
   const client = new PromptsClient(api);
   return client.createVersion(promptId, {
     content: content || `Updated content ${uniqueId()}`,

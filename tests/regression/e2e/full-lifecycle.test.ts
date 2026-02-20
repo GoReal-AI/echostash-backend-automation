@@ -8,7 +8,7 @@ import { KeysClient } from "@clients/keys-client";
 import { loginAsGuest, getGuestClient } from "@helpers/auth";
 import { projectData, promptData, versionData } from "@fixtures/test-data";
 import { uniqueId } from "@utils/index";
-import type { Project, Prompt, PromptVersion } from "@api-types/index";
+import type { Project, Prompt, CreateVersionResponse } from "@api-types/index";
 
 describe("E2E - Full Lifecycle", () => {
   describe("E2E-001: Guest -> Project -> Prompt -> Version -> Publish -> SDK Fetch", () => {
@@ -18,7 +18,7 @@ describe("E2E - Full Lifecycle", () => {
     let sdkClient: SdkClient;
     let project: Project;
     let prompt: Prompt;
-    let version: PromptVersion;
+    let version: CreateVersionResponse;
 
     beforeAll(async () => {
       // Step 1: Login as guest
@@ -47,11 +47,10 @@ describe("E2E - Full Lifecycle", () => {
       prompt = await promptsClient.create(
         promptData(project.id, {
           name: `E2E Prompt ${uniqueId()}`,
-          content: "Hello {{name}}, you are in {{place}}!",
         })
       );
       expect(prompt.id).toBeDefined();
-      expect(prompt.projectId).toBe(project.id);
+      expect(prompt.projectId).toBe(Number(project.id));
     });
 
     it("creates a version", async () => {
@@ -59,12 +58,12 @@ describe("E2E - Full Lifecycle", () => {
         content: "Hello {{name}}, you are in {{place}}!",
         changeMessage: "Initial E2E version",
       });
-      expect(version.versionNumber).toBeGreaterThanOrEqual(1);
+      expect(version.versionNo).toBeGreaterThanOrEqual(1);
     });
 
     it("publishes the version", async () => {
       const result = await promptsClient.publish(prompt.id, {
-        versionNumber: version.versionNumber,
+        versionNo: version.versionNo,
       });
       expect(result).toBeDefined();
     });
@@ -82,7 +81,7 @@ describe("E2E - Full Lifecycle", () => {
         place: "Test Environment",
       });
       expect(renderResult).toBeDefined();
-      expect(renderResult.rendered).toBeDefined();
+      expect(renderResult.content).toBeDefined();
       expect(renderResult.promptId).toBe(prompt.id);
     });
   });
@@ -103,13 +102,11 @@ describe("E2E - Full Lifecycle", () => {
 
       // Setup a published prompt
       project = await projectsClient.create(projectData());
-      prompt = await promptsClient.create(
-        promptData(project.id, { content: "Key lifecycle test {{v}}" })
-      );
+      prompt = await promptsClient.create(promptData(project.id));
       const version = await promptsClient.createVersion(prompt.id, versionData({
         content: "Key lifecycle test {{v}}",
       }));
-      await promptsClient.publish(prompt.id, { versionNumber: version.versionNumber });
+      await promptsClient.publish(prompt.id, { versionNo: version.versionNo });
     });
 
     afterAll(async () => {
@@ -158,13 +155,11 @@ describe("E2E - Full Lifecycle", () => {
       promptsClient = new PromptsClient(api);
 
       project = await projectsClient.create(projectData());
-      prompt = await promptsClient.create(
-        promptData(project.id, { content: "Public E2E test content" })
-      );
+      prompt = await promptsClient.create(promptData(project.id));
       const version = await promptsClient.createVersion(prompt.id, versionData({
         content: "Public E2E test content",
       }));
-      await promptsClient.publish(prompt.id, { versionNumber: version.versionNumber });
+      await promptsClient.publish(prompt.id, { versionNo: version.versionNo });
     });
 
     afterAll(async () => {
@@ -176,8 +171,7 @@ describe("E2E - Full Lifecycle", () => {
     });
 
     it("sets visibility to public", async () => {
-      const updated = await promptsClient.updateVisibility(prompt.id, { visibility: "public" });
-      expect(updated).toBeDefined();
+      await promptsClient.updateVisibility(prompt.id, { visibility: "public" });
     });
   });
 
@@ -194,9 +188,7 @@ describe("E2E - Full Lifecycle", () => {
       promptsClient = new PromptsClient(api);
 
       project = await projectsClient.create(projectData());
-      prompt = await promptsClient.create(
-        promptData(project.id, { content: "Multi-version test {{v}}" })
-      );
+      prompt = await promptsClient.create(promptData(project.id));
     });
 
     afterAll(async () => {
@@ -212,11 +204,11 @@ describe("E2E - Full Lifecycle", () => {
       const v2 = await promptsClient.createVersion(prompt.id, versionData({ content: "V2 content" }));
       const v3 = await promptsClient.createVersion(prompt.id, versionData({ content: "V3 content" }));
 
-      expect(v2.versionNumber).toBeGreaterThan(v1.versionNumber);
-      expect(v3.versionNumber).toBeGreaterThan(v2.versionNumber);
+      expect(v2.versionNo).toBeGreaterThan(v1.versionNo);
+      expect(v3.versionNo).toBeGreaterThan(v2.versionNo);
 
       // Publish the latest
-      await promptsClient.publish(prompt.id, { versionNumber: v3.versionNumber });
+      await promptsClient.publish(prompt.id, { versionNo: v3.versionNo });
 
       // Verify via SDK
       const sdkClient = new SdkClient(api);
